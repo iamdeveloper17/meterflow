@@ -2,6 +2,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { eventsRoutes } from './routes/events';
+import { usageRoutes } from './routes/usage';
 import { authMiddleware } from './middleware/auth';
 import { logger } from './utils/logger';
 
@@ -23,6 +24,7 @@ await app.register(
   async (instance) => {
     instance.addHook('preHandler', authMiddleware);
     await instance.register(eventsRoutes);
+    await instance.register(usageRoutes);
   },
   { prefix: '/v1' }
 );
