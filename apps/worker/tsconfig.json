@@ -13,7 +13,12 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
+    "paths": {
+      "@meterflow/shared": ["../../packages/shared/src/index.ts"],
+      "@meterflow/database": ["../../packages/database/src/index.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
