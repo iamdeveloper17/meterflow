@@ -34,25 +34,24 @@ export async function getUsage(params: {
 }): Promise<UsageQueryResult[]> {
   const period = params.billingPeriod || getCurrentBillingPeriod();
 
-  // Fetch from Postgres (aggregated)
-  const metricFilter = params.metric
-    ? {
-        organizationId_name: {
-          organizationId: params.organizationId,
-          name: params.metric,
-        },
-      }
-    : undefined;
-
-  const dbRecords = await prisma.usageRecord.findMany({
-    where: {
-      billingPeriod: period,
-      customer: {
-        organizationId: params.organizationId,
-        externalId: params.customerId,
-      },
-      ...(metricFilter && { metric: metricFilter }),
+  // Build where clause without dynamic relation filter
+  const whereClause: any = {
+    billingPeriod: period,
+    customer: {
+      organizationId: params.organizationId,
+      externalId: params.customerId,
     },
+  };
+
+  if (params.metric) {
+    whereClause.metric = {
+      name: params.metric,
+    };
+  }
+
+  // Fetch from Postgres (aggregated)
+  const dbRecords = await prisma.usageRecord.findMany({
+    where: whereClause,
     include: {
       metric: true,
       customer: true,
@@ -63,10 +62,13 @@ export async function getUsage(params: {
   const results = new Map<string, UsageQueryResult>();
 
   for (const record of dbRecords) {
-    results.set(record.metric.name, {
+    const metricName = (record as any).metric?.name;
+    if (!metricName) continue;
+
+    results.set(metricName, {
       customerId: params.customerId,
       organizationId: params.organizationId,
-      metric: record.metric.name,
+      metric: metricName,
       billingPeriod: record.billingPeriod,
       totalValue: Number(record.totalValue),
       eventCount: record.eventCount,
@@ -105,7 +107,6 @@ export async function getUsage(params: {
       const existing = results.get(metricName);
 
       if (existing) {
-        // Combine: use Redis value as latest (it's always >= Postgres)
         results.set(metricName, {
           ...existing,
           totalValue: redisValueNum,
@@ -114,7 +115,6 @@ export async function getUsage(params: {
           source: 'combined',
         });
       } else {
-        // Only in Redis (not yet aggregated to Postgres)
         results.set(metricName, {
           customerId: params.customerId,
           organizationId: params.organizationId,

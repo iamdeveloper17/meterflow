@@ -3,19 +3,22 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
-    "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node"],
-    "composite": true
+    "baseUrl": ".",
+    "paths": {
+      "@meterflow/shared": ["./packages/shared/src/index.ts"],
+      "@meterflow/database": ["./packages/database/src/index.ts"]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".next",
+    ".turbo"
+  ]
 }
