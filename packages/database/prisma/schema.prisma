@@ -8,7 +8,362 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model HealthCheck {
+// ============================================
+// USERS & AUTH
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  organizations OrganizationMember[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ============================================
+// ORGANIZATIONS
+// ============================================
+
+model Organization {
   id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  plan      PlanType @default(FREE)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      OrganizationMember[]
+  apiKeys      ApiKey[]
+  customers    Customer[]
+  metrics      Metric[]
+  pricingPlans PricingPlan[]
+  invoices     Invoice[]
+  webhooks     Webhook[]
+
+  @@index([slug])
+  @@map("organizations")
+}
+
+enum PlanType {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role     @default(MEMBER)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ============================================
+// API KEYS
+// ============================================
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  keyHash        String    @unique
+  keyPrefix      String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+// ============================================
+// CUSTOMERS
+// ============================================
+
+model Customer {
+  id             String   @id @default(cuid())
+  organizationId String
+  externalId     String
+  name           String
+  email          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  usageRecords UsageRecord[]
+  invoices     Invoice[]
+  pricingPlans PricingPlan[]
+
+  @@unique([organizationId, externalId])
+  @@index([organizationId])
+  @@map("customers")
+}
+
+// ============================================
+// METRICS
+// ============================================
+
+model Metric {
+  id             String          @id @default(cuid())
+  organizationId String
+  name           String
+  displayName    String
+  unit           String          @default("count")
+  aggregation    AggregationType @default(SUM)
+  createdAt      DateTime        @default(now())
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  usageRecords UsageRecord[]
+  planPrices   PlanPrice[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("metrics")
+}
+
+enum AggregationType {
+  SUM
+  COUNT
+  MAX
+  MIN
+  AVG
+}
+
+// ============================================
+// USAGE RECORDS
+// ============================================
+
+model UsageRecord {
+  id            String   @id @default(cuid())
+  customerId    String
+  metricId      String
+  billingPeriod String
+  totalValue    Decimal  @default(0) @db.Decimal(20, 6)
+  eventCount    Int      @default(0)
+  lastUpdatedAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  metric   Metric   @relation(fields: [metricId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, metricId, billingPeriod])
+  @@index([customerId, billingPeriod])
+  @@index([metricId])
+  @@map("usage_records")
+}
+
+model RawEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  customerId     String
+  metricName     String
+  value          Decimal  @db.Decimal(20, 6)
+  idempotencyKey String?  @unique
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([customerId, metricName, createdAt])
+  @@map("raw_events")
+}
+
+// ============================================
+// PRICING PLANS
+// ============================================
+
+model PricingPlan {
+  id             String        @id @default(cuid())
+  organizationId String
+  customerId     String?
+  name           String
+  currency       String        @default("INR")
+  billingPeriod  BillingPeriod @default(MONTHLY)
+  isActive       Boolean       @default(true)
+  model          PricingModel  @default(TIERED)
+  baseFee        Decimal       @default(0) @db.Decimal(20, 6)
+  tiers          Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  prices       PlanPrice[]
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@map("pricing_plans")
+}
+
+enum BillingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum PricingModel {
+  FLAT
+  TIERED
+  VOLUME
+  OVERAGE
+  PER_UNIT
+}
+
+model PlanPrice {
+  id            String   @id @default(cuid())
+  planId        String
+  metricId      String
+  pricePerUnit  Decimal? @db.Decimal(20, 6)
+  includedUnits Decimal? @db.Decimal(20, 6)
+
+  plan   PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  metric Metric      @relation(fields: [metricId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, metricId])
+  @@map("plan_prices")
+}
+
+// ============================================
+// INVOICES
+// ============================================
+
+model Invoice {
+  id             String        @id @default(cuid())
+  organizationId String
+  customerId     String
+  invoiceNumber  String        @unique
+  billingPeriod  String
+  status         InvoiceStatus @default(DRAFT)
+  currency       String        @default("INR")
+  subtotal       Decimal       @db.Decimal(20, 6)
+  tax            Decimal       @default(0) @db.Decimal(20, 6)
+  total          Decimal       @db.Decimal(20, 6)
+  stripeInvoiceId String?      @unique
+  stripePaymentId String?
+  stripeStatus    String?
+  dueDate        DateTime
+  paidAt         DateTime?
+  pdfUrl         String?
+  lineItems      Json
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([customerId])
+  @@index([billingPeriod])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  FAILED
+  VOID
+  REFUNDED
+}
+
+// ============================================
+// WEBHOOKS
+// ============================================
+
+model Webhook {
+  id             String   @id @default(cuid())
+  organizationId String
+  url            String
+  secret         String
+  events         String[]
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("webhooks")
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  action         String
+  resourceType   String
+  resourceId     String
+  changes        Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
 }
