@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ['@meterflow/database', '@meterflow/shared'],
+  serverExternalPackages: ['@prisma/client', 'prisma', 'ioredis', 'bullmq'],
 };
 
 export default nextConfig;

@@ -4,7 +4,8 @@ import { redisConnection, QUEUE_NAMES } from '@meterflow/shared';
 import {
   incrementUsageCounter,
   incrementEventCount,
-  storeRawEvent,
+  storeRawEventInRedis,
+  storeRawEventInPostgres,
 } from '../services/counter.service';
 import { logger } from '../utils/logger';
 
@@ -32,7 +33,8 @@ export function createMeteringWorker(): Worker {
       await incrementEventCount(data);
 
       // 3. Store raw event (audit trail)
-      await storeRawEvent(data);
+      await storeRawEventInRedis(data);
+      await storeRawEventInPostgres(data);
 
       return {
         eventId: data.eventId,
