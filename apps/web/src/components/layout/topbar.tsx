@@ -1,5 +1,3 @@
-'use client';
-
 import { Bell, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,8 +10,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { auth, signOut } from '@/lib/auth/config';
 
-export function Topbar() {
+export async function Topbar() {
+  const session = await auth();
+
+  const initials =
+    session?.user?.name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase() || 'U';
+
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-background px-6">
       {/* Search */}
@@ -41,7 +49,7 @@ export function Topbar() {
                 className="relative h-9 w-9 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback>AK</AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
               </button>
             }
@@ -49,9 +57,11 @@ export function Topbar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Amit Kumar</span>
+                <span className="text-sm font-medium">
+                  {session?.user?.name || 'User'}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  amit@example.com
+                  {session?.user?.email || 'Not signed in'}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -59,9 +69,19 @@ export function Topbar() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              Logout
-            </DropdownMenuItem>
+            <form
+              action={async () => {
+                'use server';
+                await signOut({ redirectTo: '/login' });
+              }}
+            >
+              <button
+                type="submit"
+                className="w-full text-left text-sm text-destructive px-2 py-1.5 hover:bg-accent rounded-sm"
+              >
+                Logout
+              </button>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

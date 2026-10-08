@@ -12,10 +12,10 @@ export async function GET() {
     // 2. Total usage records
     const totalUsageRecords = await prisma.usageRecord.count();
 
-    // 3. Total events (from Postgres raw_events)
+    // 3. Total events
     const totalEvents = await prisma.rawEvent.count();
 
-    // 4. Total revenue (sum of usage records × rough estimate)
+    // 4. Total usage sum
     const usageSum = await prisma.usageRecord.aggregate({
       _sum: { totalValue: true },
     });
@@ -23,13 +23,13 @@ export async function GET() {
     // 5. Active Redis counters
     const redisKeys = await scanKeys('usage:*');
 
-    // 6. Recent raw events (last 5)
+    // 6. Recent events
     const recentEvents = await prisma.rawEvent.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
     });
 
-    // 7. Last 7 days usage for chart
+    // 7. Last 7 days usage
     const last7Days = await getLast7DaysUsage();
 
     return NextResponse.json({
