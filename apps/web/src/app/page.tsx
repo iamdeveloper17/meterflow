@@ -105,7 +105,7 @@ export default async function HomePage() {
                       <div className="text-right">
                         <p className="text-sm font-medium">+{event.value}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(event.createdAt).toLocaleTimeString()}
+                          {new Date(event.createdAt).toISOString().split('T')[1].slice(0, 8)}
                         </p>
                       </div>
                     </div>
