@@ -1,13 +1,19 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { validateApiKey } from '../services/api-key.service';
 import { logger } from '../utils/logger';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    apiKey?: string;
+    apiKeyId?: string;
+    organizationId?: string;
+    organizationName?: string;
   }
 }
 
-export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
+export async function authMiddleware(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
@@ -33,9 +39,29 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     });
   }
 
-  request.apiKey = apiKey;
+  // Validate against database
+  const validated = await validateApiKey(apiKey);
 
-  logger.debug({ keyPrefix: apiKey.slice(0, 16) }, 'Auth check passed');
+  if (!validated) {
+    logger.warn(
+      { keyPrefix: apiKey.slice(0, 16) },
+      'Invalid API key attempt'
+    );
+    return reply.status(401).send({
+      error: 'Invalid or revoked API key',
+    });
+  }
 
-  // TODO Day 4: Validate against database + resolve organizationId
+  // Attach to request
+  request.apiKeyId = validated.id;
+  request.organizationId = validated.organizationId;
+  request.organizationName = validated.organizationName;
+
+  logger.debug(
+    {
+      keyPrefix: apiKey.slice(0, 16),
+      organizationId: validated.organizationId,
+    },
+    'Auth check passed'
+  );
 }

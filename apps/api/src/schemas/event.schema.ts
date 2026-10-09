@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const eventBodySchema = z.object({
-  organizationId: z.string().min(1, 'organizationId is required'),
   customerId: z.string().min(1, 'customerId is required'),
   metric: z.string().min(1).max(50),
   value: z.number().positive(),
