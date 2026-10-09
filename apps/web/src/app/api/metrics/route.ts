@@ -24,7 +24,7 @@ export async function GET() {
 
     // Enrich each metric with live Redis usage
     const enriched = await Promise.all(
-      metrics.map(async (metric) => {
+      metrics.map(async (metric: any) => {          // ← async add kiya
         // Scan Redis for all keys matching this metric
         const pattern = `usage:*:*:${metric.name}:${period}`;
         const keys = await scanKeys(pattern);
@@ -41,7 +41,7 @@ export async function GET() {
         }
 
         const dbUsage = metric.usageRecords.reduce(
-          (sum, r) => sum + Number(r.totalValue),
+          (sum: number, r: any) => sum + Number(r.totalValue),
           0
         );
 

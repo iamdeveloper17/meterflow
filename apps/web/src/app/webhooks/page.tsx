@@ -20,7 +20,7 @@ async function getWebhooks() {
       orderBy: { createdAt: 'desc' },
     });
 
-    return webhooks.map((w) => ({
+    return webhooks.map((w: any) => ({
       id: w.id,
       url: w.url,
       events: w.events,
@@ -34,7 +34,7 @@ async function getWebhooks() {
 
 export default async function WebhooksPage() {
   const webhooks = await getWebhooks();
-  const activeCount = webhooks.filter((w) => w.isActive).length;
+  const activeCount = webhooks.filter((w: any) => w.isActive).length;
 
   return (
     <DashboardShell>

@@ -25,14 +25,11 @@ export async function GET() {
 
     // Enrich with Redis real-time data
     const enriched = await Promise.all(
-      customers.map(async (customer) => {
+     customers.map(async (customer: any) => {
         let liveUsage = 0;
 
         // Sum all usage records for this period
-        const dbUsage = customer.usageRecords.reduce(
-          (sum, r) => sum + Number(r.totalValue),
-          0
-        );
+        const dbUsage = customer.usageRecords.reduce((sum: number, r: any) => sum + Number(r.totalValue), 0);
 
         // Scan Redis for this customer's counters
         const pattern = `usage:${customer.organizationId}:${customer.externalId}:*:${period}`;

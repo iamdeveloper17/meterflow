@@ -40,7 +40,7 @@ export async function GET() {
         totalUsage: Number(usageSum._sum.totalValue || 0),
         activeCounters: redisKeys.length,
       },
-      recentEvents: recentEvents.map((e) => ({
+      recentEvents: recentEvents.map((e: any) => ({
         id: e.id,
         customerId: e.customerId,
         metricName: e.metricName,
@@ -98,7 +98,7 @@ async function getLast7DaysUsage() {
       },
     });
 
-    const usage = events.reduce((sum, e) => sum + Number(e.value), 0);
+    const usage = events.reduce((sum: number, e: any) => sum + Number(e.value), 0);
 
     days.push({
       date: day.toISOString().split('T')[0],

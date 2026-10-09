@@ -17,7 +17,7 @@ async function getKeys() {
     const organizationId = 'org_test_001';
     const keys = await listApiKeys(organizationId);
 
-    return keys.map((k) => ({
+    return keys.map((k: any) => ({
       ...k,
       lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
       expiresAt: k.expiresAt?.toISOString() ?? null,
@@ -30,7 +30,7 @@ async function getKeys() {
 
 export default async function ApiKeysPage() {
   const keys = await getKeys();
-  const activeCount = keys.filter((k) => k.isActive).length;
+  const activeCount = keys.filter((k: any) => k.isActive).length;
 
   return (
     <DashboardShell>

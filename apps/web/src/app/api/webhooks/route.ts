@@ -29,7 +29,7 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      webhooks: webhooks.map((w) => ({
+      webhooks: webhooks.map((w: any) => ({
         id: w.id,
         url: w.url,
         events: w.events,

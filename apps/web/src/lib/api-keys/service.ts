@@ -120,7 +120,7 @@ export async function validateApiKey(key: string) {
       where: { id: apiKey.id },
       data: { lastUsedAt: new Date() },
     })
-    .catch((err) => console.error('Failed to update lastUsedAt:', err));
+    .catch((err: any) => console.error('Failed to update lastUsedAt:', err));
 
   return {
     id: apiKey.id,

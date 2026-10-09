@@ -16,7 +16,7 @@ export async function GET() {
       },
     });
 
-    const formatted = plans.map((plan) => ({
+    const formatted = plans.map((plan: any) => ({
       id: plan.id,
       name: plan.name,
       currency: plan.currency,
@@ -27,7 +27,7 @@ export async function GET() {
       customer: plan.customer
         ? { id: plan.customer.id, name: plan.customer.name }
         : null,
-      prices: plan.prices.map((p) => ({
+      prices: plan.prices.map((p: any) => ({
         metricName: p.metric.name,
         pricePerUnit: p.pricePerUnit ? Number(p.pricePerUnit) : null,
         includedUnits: p.includedUnits ? Number(p.includedUnits) : null,
