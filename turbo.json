@@ -4,9 +4,15 @@
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
+    "DIRECT_URL",
     "REDIS_URL",
-    "NEXTAUTH_SECRET",
-    "NEXTAUTH_URL"
+    "AUTH_SECRET",
+    "AUTH_TRUST_HOST",
+    "AUTH_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_API_URL"
   ],
   "tasks": {
     "build": {
