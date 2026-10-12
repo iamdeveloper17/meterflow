@@ -1,0 +1,16 @@
+# nixpacks.toml — Railway build for MeterFlow monorepo
+
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm-9_x"]
+
+[phases.install]
+cmds = ["pnpm install --prod=false"]
+
+[phases.build]
+cmds = [
+  "pnpm --filter @meterflow/shared build",
+  "pnpm --filter @meterflow/database db:generate"
+]
