@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { getUsage } from '../services/usage.service';
+import { getUsage } from '../services/usage.service.js';
 
 const usageQuerySchema = z.object({
   organizationId: z.string().min(1),

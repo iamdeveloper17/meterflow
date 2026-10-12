@@ -1,6 +1,6 @@
 import { usageEventsQueue } from '@meterflow/shared';
 import type { UsageEventJob } from '@meterflow/shared';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 export async function publishUsageEvent(job: UsageEventJob): Promise<void> {
   try {

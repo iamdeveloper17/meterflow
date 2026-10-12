@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
-import { eventBodySchema, batchEventBodySchema } from '../schemas/event.schema';
-import { publishUsageEvent, publishBatchUsageEvents } from '../queue/producer';
+import { eventBodySchema, batchEventBodySchema } from '../schemas/event.schema.js';
+import { publishUsageEvent, publishBatchUsageEvents } from '../queue/producer.js';
 import type { UsageEventJob } from '@meterflow/shared';
 
 export async function eventsRoutes(app: FastifyInstance) {

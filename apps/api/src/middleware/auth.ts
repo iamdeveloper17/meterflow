@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { validateApiKey } from '../services/api-key.service';
-import { logger } from '../utils/logger';
+import { validateApiKey } from '../services/api-key.service.js';
+import { logger } from '../utils/logger.js';
 
 declare module 'fastify' {
   interface FastifyRequest {

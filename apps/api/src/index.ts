@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { eventsRoutes } from './routes/events';
-import { usageRoutes } from './routes/usage';
-import { authMiddleware } from './middleware/auth';
-import { logger } from './utils/logger';
+import { eventsRoutes } from './routes/events.js';
+import { usageRoutes } from './routes/usage.js';
+import { authMiddleware } from './middleware/auth.js';
+import { logger } from './utils/logger.js';
 
 const app = Fastify({
   loggerInstance: logger,
