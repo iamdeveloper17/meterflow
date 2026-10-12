@@ -1,7 +1,7 @@
 import type { UsageEventJob } from '@meterflow/shared';
 import { redisConnection } from '@meterflow/shared';
 import { prisma } from '@meterflow/database';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 /**
  * Generate Redis key for usage counter

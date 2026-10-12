@@ -1,4 +1,4 @@
-import type { PricingTier, PricingResult, PricingBreakdown } from './types';
+import type { PricingTier, PricingResult, PricingBreakdown } from './types.js';
 
 /**
  * Calculate price using tiered (graduated) pricing

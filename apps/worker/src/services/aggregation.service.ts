@@ -1,6 +1,6 @@
 import { prisma } from '@meterflow/database';
 import { redisConnection } from '@meterflow/shared';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 /**
  * Scan Redis for all usage counters matching pattern

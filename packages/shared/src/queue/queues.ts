@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
-import { redisConnection } from './connection';
-import { QUEUE_NAMES } from '../constants';
+import { redisConnection } from './connection.js';
+import { QUEUE_NAMES } from '../constants.js';
 
 /**
  * Usage Events Queue

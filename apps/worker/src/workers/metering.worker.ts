@@ -6,8 +6,8 @@ import {
   incrementEventCount,
   storeRawEventInRedis,
   storeRawEventInPostgres,
-} from '../services/counter.service';
-import { logger } from '../utils/logger';
+} from '../services/counter.service.js';
+import { logger } from '../utils/logger.js';
 
 export function createMeteringWorker(): Worker {
   const worker = new Worker<UsageEventJob>(

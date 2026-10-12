@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
 import { redisConnection, QUEUE_NAMES } from '@meterflow/shared';
-import { runAggregation } from '../services/aggregation.service';
-import { logger } from '../utils/logger';
+import { runAggregation } from '../services/aggregation.service.js';
+import { logger } from '../utils/logger.js';
 
 export function createAggregationWorker(): Worker {
   const worker = new Worker(

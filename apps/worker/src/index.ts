@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { createMeteringWorker } from './workers/metering.worker';
-import { createAggregationWorker } from './jobs/aggregation.job';
-import { registerCronJobs } from './schedulers/cron';
-import { logger } from './utils/logger';
+import { createMeteringWorker } from './workers/metering.worker.js';
+import { createAggregationWorker } from './jobs/aggregation.job.js';
+import { registerCronJobs } from './schedulers/cron.js';
+import { logger } from './utils/logger.js';
 
 async function main() {
   logger.info('🚀 Starting MeterFlow worker...');

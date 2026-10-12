@@ -1,5 +1,5 @@
 import { aggregationQueue, QUEUE_NAMES } from '@meterflow/shared';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 /**
  * Register all cron jobs
